@@ -33,7 +33,7 @@ public class GeminiProvider implements AIProvider {
     @Value("${gemini.api.key:}")
     private String apiKey;
 
-    @Value("${gemini.model:gemini-1.5-flash}")
+    @Value("${gemini.model:gemini-2.5-flash}")
     private String modelName;
 
     public GeminiProvider(ObjectMapper objectMapper, AssistantProfileService profileService) {
