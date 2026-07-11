@@ -1,0 +1,32 @@
+appId: com.openai.chat2006
+productName: ChatGPT Professional Enterprise Suite
+copyright: Copyright © 2006 OpenAI
+
+directories:
+  output: release/${version}
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: "ChatGPT Professional Enterprise Suite"
+
+extraResources:
+  - from: ../backend/target/chat2006-1.0.0-SNAPSHOT.jar
+    to: backend.jar
+
+# Use local temp directories to avoid EPERM permission issues on Windows
+electronDownload:
+  cache: .eb-cache/electron
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json

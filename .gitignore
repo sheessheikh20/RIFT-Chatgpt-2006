@@ -1,0 +1,32 @@
+# React build and dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/dist-electron/
+frontend/release/
+frontend/.eb-cache/
+
+# Maven target and compile output
+backend/target/
+backend/.mvn/
+backend/.metadata/
+*.class
+*.jar
+
+# User Data / RIFT Runtime directories
+ChatGPT Professional/Logs/
+ChatGPT Professional/Cache/
+ChatGPT Professional/Exports/
+ChatGPT Professional/Sessions/
+ChatGPT Professional/database/
+ChatGPT Professional/Backups/
+ChatGPT Professional/Updates/
+ChatGPT Professional/Runtime/
+ChatGPT Professional/Config/
+
+# System / Editor files
+.idea/
+.vscode/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
