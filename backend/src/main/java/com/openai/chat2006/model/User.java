@@ -47,7 +47,7 @@ public class User implements UserDetails {
     // ── Google OAuth Fields ──────────────────────────────────────────────
 
     /** Unique Google account ID (sub field from userinfo) */
-    @Column(name = "google_id", unique = true)
+    @Column(name = "google_id")
     private String googleId;
 
     /** User's primary email address from Google */

@@ -43,7 +43,7 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, onClose, l
     { time: '', text: 'SYSTEM: No active session loaded.', color: 'text-cyan-300' },
   ]);
 
-  const { showDialog } = useDialogStore();
+  const { showDialog, hideDialog } = useDialogStore();
 
   function formatTime(d: Date) {
     return `[${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}]`;
@@ -166,9 +166,24 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, onClose, l
     } catch (err: any) {
       if (err.status === 428) {
         showDialog('KnowledgePackRequired', {
-          message: err.message,
-          requiredPack: err.packName,
-          dependencies: ['Core Language Engine', 'Local Storage Module']
+          message: `${err.message || 'Required Knowledge Pack Missing.'} Would you like to download and install it now?`,
+          requiredPack: err.packName || 'Missing Pack',
+          dependencies: ['Core Language Engine', 'Local Storage Module'],
+          onConfirm: async () => {
+            hideDialog();
+            setIsProcessing(true);
+            addLog(`Downloading and installing pack: ${err.packName || 'Required Pack'}...`);
+            try {
+              await installPack(err.packId);
+              addLog(`Successfully installed ${err.packName || 'pack'} knowledge pack.`);
+              showDialog('Information', { message: `Knowledge Pack '${err.packName || 'Required Pack'}' installed successfully! You can now repeat your message.` });
+            } catch (e: any) {
+              showDialog('Error', { message: e.message || `Failed to install ${err.packName || 'pack'}.` });
+              addLog(`Installation failed for ${err.packName || 'pack'}.`);
+            } finally {
+              setIsProcessing(false);
+            }
+          }
         });
       } else {
         showDialog('Error', { message: err.message || 'An error occurred processing the request.' });

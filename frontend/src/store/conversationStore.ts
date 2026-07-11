@@ -150,7 +150,7 @@ export const useConversationStore = create<ConversationStore>()((set, get) => ({
 
       // Check for 428 KNOWLEDGE_PACK_MISSING
       if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 428) {
-        return { knowledgePackError: err as unknown as KnowledgePackMissingError };
+        throw err;
       }
 
       const msg = err instanceof Error ? err.message : 'Failed to send message';

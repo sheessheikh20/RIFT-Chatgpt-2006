@@ -103,7 +103,7 @@ function setupDataDirectories(): { basePath: string; dbUrl: string } {
 function getBackendJarPath(): string {
   if (isDev) {
     const projectRoot = path.resolve(__dirname, '../..');
-    return path.join(projectRoot, 'backend', 'target', 'chat2006-1.0.0-SNAPSHOT.jar');
+    return path.join(projectRoot, 'backend', 'target', 'chat2006-1.0.1-SNAPSHOT.jar');
   }
   return path.join(process.resourcesPath, 'backend.jar');
 }

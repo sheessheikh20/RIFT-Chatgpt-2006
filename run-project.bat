@@ -17,7 +17,6 @@ if not exist "target\chat2006-1.0.1-SNAPSHOT.jar" (
     echo [Backend] Compiled JAR not found. Building backend - requires Java and Maven...
     call mvn clean package -DskipTests
 )
-restore-backend
 start "RIFT Backend Server" cmd /k "java -jar target\chat2006-1.0.1-SNAPSHOT.jar"
 
 :: 3. Launch Vite / Electron frontend
