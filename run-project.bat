@@ -22,7 +22,7 @@ start "RIFT Backend Server" cmd /k "java -jar target\chat2006-1.0.0-SNAPSHOT.jar
 :: 3. Launch Vite / Electron frontend
 echo [Step 3] Booting Electron Workspace Client...
 cd /d "%~dp0frontend"
-if not exist "node_modules\" (
+if not exist "node_modules" (
     echo [Frontend] Dependencies not found. Installing node packages...
     call npm install
 )
