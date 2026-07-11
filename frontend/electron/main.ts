@@ -178,7 +178,7 @@ function createWindow(): void {
     void mainWindow.loadURL('http://localhost:5173').catch((err: Error) => {
       console.error('[Electron] loadURL error:', err.message);
     });
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools(); // Disabled DevTools auto-open on startup
   } else {
     void mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
@@ -194,7 +194,7 @@ function registerIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.OPEN_FILE_DIALOG, async () => {
     if (!mainWindow) return null;
-    const result = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'] });
+    const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] });
     return result.canceled ? null : result.filePaths[0];
   });
 

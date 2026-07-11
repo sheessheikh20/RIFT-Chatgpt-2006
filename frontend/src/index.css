@@ -1,4 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-dialog-face: #ECE9D8;
+  --color-border-shadow: #ACA899;
+  --color-border-dark: #716F64;
+  --color-window-inner: #FFFFFF;
+  --color-text-main: #000000;
+  --color-text-disabled: #808080;
+  --color-header-blue-top: #0055E5;
+  --color-header-blue-bottom: #D4D0C8;
+  --color-primary: #0451ab;
+  --color-primary-container: #316ac5;
+
+  --spacing-footer-h: 47px;
+  --spacing-header-h: 58px;
+  --spacing-dialog-width: 497px;
+  --spacing-button-h: 23px;
+  --spacing-sidebar-w: 164px;
+  --spacing-gutter-button: 7px;
+  --spacing-margin-edge: 12px;
+  --spacing-button-w: 75px;
+  --spacing-dialog-height: 360px;
+
+  --font-display-welcome: "Trebuchet MS", sans-serif;
+  --font-body-standard: Tahoma, sans-serif;
+  --font-label-button: Tahoma, sans-serif;
+  --font-header-title: Tahoma, sans-serif;
+
+  --font-size-display-welcome: 22px;
+  --font-size-body-standard: 11px;
+  --font-size-label-button: 11px;
+  --font-size-header-title: 12px;
+}
 
 /* ─── Custom Scrollbar (Win32 style) ─────────────────────── */
 ::-webkit-scrollbar { width: 16px; height: 16px; }
