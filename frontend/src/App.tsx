@@ -9,6 +9,7 @@ import { QueueScreen } from './components/QueueScreen';
 import { WorkspaceScreen } from './components/WorkspaceScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { DialogManager } from './components/DialogManager';
+import { getToken, getCurrentUser } from './api';
 
 interface WindowSize {
   width: number;
@@ -75,6 +76,20 @@ export default function App() {
     const installed = localStorage.getItem('isInstalled') === 'true';
     return installed ? 'splash' : 'installer';
   });
+
+  // If we have a valid token already, skip queue/login and go straight to workspace
+  useEffect(() => {
+    if (activeWindowId === 'login') {
+      const token = getToken();
+      if (token) {
+        getCurrentUser().then(() => {
+          setActiveWindowId('workspace');
+        }).catch(() => {
+          // Token expired or invalid — stay on login
+        });
+      }
+    }
+  }, [activeWindowId]);
 
   // Call the Electron resize API on mount and whenever the active window transitions
   useEffect(() => {

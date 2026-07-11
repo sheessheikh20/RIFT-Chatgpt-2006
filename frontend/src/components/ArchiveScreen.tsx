@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Conversation, ConversationFolder, Message } from '../types';
 import { fetchConversations, fetchMessages, updateConversation, deleteConversation, exportConversation } from '../api';
+import { useDialogStore } from '../store/dialogStore';
 
 export const ArchiveScreen: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -8,6 +9,7 @@ export const ArchiveScreen: React.FC = () => {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [previewMessages, setPreviewMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { showDialog } = useDialogStore();
 
   // Load conversations when folder changes
   useEffect(() => {
@@ -57,17 +59,21 @@ export const ArchiveScreen: React.FC = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!selectedConversation) return;
-    if (!window.confirm('Are you sure you want to permanently delete this conversation?')) return;
-    try {
-      await deleteConversation(selectedConversation.id);
-      setConversations(prev => prev.filter(c => c.id !== selectedConversation.id));
-      setSelectedConversation(null);
-      setPreviewMessages([]);
-    } catch (err) {
-      console.error('Failed to delete conversation:', err);
-    }
+    showDialog('DeleteConfirmation', {
+      message: `Permanently delete "${selectedConversation.title}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await deleteConversation(selectedConversation.id);
+          setConversations(prev => prev.filter(c => c.id !== selectedConversation.id));
+          setSelectedConversation(null);
+          setPreviewMessages([]);
+        } catch (err) {
+          console.error('Failed to delete conversation:', err);
+        }
+      },
+    });
   };
 
   const handleExport = async () => {
