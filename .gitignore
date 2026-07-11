@@ -30,3 +30,6 @@ ChatGPT Professional/Config/
 *.tmp
 .DS_Store
 Thumbs.db
+
+# Local secrets — NEVER commit these
+backend/src/main/resources/.env.properties

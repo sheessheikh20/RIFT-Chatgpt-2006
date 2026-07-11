@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +26,10 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String username;
 
+    /** Nullable: Google-authenticated users have no local password */
     @Column(nullable = false)
-    private String password;
+    @Builder.Default
+    private String password = "";
 
     @Column(name = "registered_to")
     private String registeredTo;
@@ -40,6 +43,31 @@ public class User implements UserDetails {
     @Column(name = "queries_remaining")
     @Builder.Default
     private int queriesRemaining = 500;
+
+    // ── Google OAuth Fields ──────────────────────────────────────────────
+
+    /** Unique Google account ID (sub field from userinfo) */
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    /** User's primary email address from Google */
+    @Column(name = "email")
+    private String email;
+
+    /** URL of the Google profile picture */
+    @Column(name = "profile_picture", length = 1024)
+    private String profilePicture;
+
+    /** Timestamp when this account was first created */
+    @Column(name = "created_at")
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    /** Timestamp of the most recent successful login */
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    // ── Spring Security ──────────────────────────────────────────────────
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -57,22 +85,14 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }

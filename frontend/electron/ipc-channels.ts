@@ -25,6 +25,9 @@ export const IPC_CHANNELS = {
   MINIMIZE_WINDOW: 'window:minimize',
   MAXIMIZE_WINDOW: 'window:maximize',
   CLOSE_WINDOW: 'window:close',
+
+  // OAuth
+  ON_OAUTH_CALLBACK: 'oauth:callback',
 } as const;
 
 export type IpcChannel = (typeof IPC_CHANNELS)[keyof typeof IPC_CHANNELS];

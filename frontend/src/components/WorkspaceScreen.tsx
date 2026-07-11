@@ -7,11 +7,13 @@ import { useKnowledgePackStore } from '../store/knowledgePackStore';
 
 interface WorkspaceProps {
   onLogout: () => void;
+  onClose: () => void;
   latencyMs: number;
   isGuest?: boolean;
 }
 
-export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs, isGuest = false }) => {
+export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, onClose, latencyMs, isGuest = false }) => {
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const GUEST_MESSAGE_LIMIT = 5;
   const [guestMessageCount, setGuestMessageCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'thread' | 'archive' | 'library' | 'control' | 'help'>('thread');
@@ -80,6 +82,22 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs,
     const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
     const ss = String(s % 60).padStart(2, '0');
     return `${hh}:${mm}:${ss}`;
+  };
+
+  const handleNewConversation = async () => {
+    setIsProcessing(true);
+    try {
+      const data = await createConversation('New Conversation', 'Inbox');
+      setConversations(prev => [...prev, data]);
+      setCurrentConvId(data.id);
+      setMessages([]);
+      setActiveTab('thread');
+      addLog('New session initialized.');
+    } catch (e: any) {
+      showDialog('Error', { message: e.message || 'Failed to start conversation.' });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleExecute = async () => {
@@ -167,152 +185,25 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs,
     <div className="w-full h-full bg-dialog-face flex flex-col shadow-2xl relative select-none text-text-main font-body-standard overflow-hidden"
          style={{ boxShadow: '2px 2px 0px #000000' }}>
 
-      {/* === TopAppBar (Title Bar + Menu Bar + Toolbar) === */}
-      <header className="flex flex-col w-full h-auto px-1 bg-header-blue-bottom border-b border-border-shadow"
-              style={{ boxShadow: 'inset 1px 1px 0px #FFFFFF' }}>
-
-        {/* Title Bar */}
-        <div className="flex justify-between items-center h-[26px] px-2 text-white font-bold"
-             style={{ background: 'linear-gradient(to right, #0055E5, #2d6af9)' }}>
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px]">terminal</span>
-            <span className="font-header-title text-header-title text-white">Enterprise AI Workstation 2006</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <button className="w-[21px] h-[21px] flex items-center justify-center bg-dialog-face text-black p-0 outset-border"
-                    title="Minimize">
-              <span className="material-symbols-outlined text-[14px]">minimize</span>
-            </button>
-            <button className="w-[21px] h-[21px] flex items-center justify-center bg-dialog-face text-black p-0 outset-border"
-                    title="Maximize">
-              <span className="material-symbols-outlined text-[14px]">check_box_outline_blank</span>
-            </button>
-            <button className="w-[21px] h-[21px] flex items-center justify-center text-white p-0 outset-border"
-                    style={{ background: '#CC3300' }}
-                    onClick={onLogout}
-                    title="Close">
-              <span className="material-symbols-outlined text-[14px]">close</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Menu Bar */}
-        <nav className="flex items-center h-[22px] px-1 gap-4 text-on-surface text-body-standard">
-          <span className="hover:bg-primary-container hover:text-white px-1 cursor-default">File</span>
-          <span className="hover:bg-primary-container hover:text-white px-1 cursor-default">Edit</span>
-          <span className="hover:bg-primary-container hover:text-white px-1 cursor-default">View</span>
-          <span className={`px-1 cursor-default font-bold ${activeTab === 'library'
-            ? 'text-on-primary-fixed bg-primary-fixed-dim border border-on-primary-fixed-variant'
-            : 'hover:bg-primary-container hover:text-white'}`}
-            onClick={() => setActiveTab('library')}>Knowledge</span>
-          <span className="hover:bg-primary-container hover:text-white px-1 cursor-default"
-                onClick={() => setActiveTab('control')}>Tools</span>
-          <span className="hover:bg-primary-container hover:text-white px-1 cursor-default">Window</span>
-          <span className="hover:bg-primary-container hover:text-white px-1 cursor-default"
-                onClick={() => setActiveTab('help')}>Help</span>
-        </nav>
-
-        {/* Toolbar */}
-        <div className="flex items-center gap-1 p-1 bg-dialog-face border-t border-white border-b border-border-shadow">
-          {/* File group */}
-          <div className="flex items-center gap-0 pr-2 border-r border-border-shadow">
-            <button
-              onClick={async () => {
-                setIsProcessing(true);
-                try {
-                  const data = await createConversation('New Conversation', 'Inbox');
-                  setConversations(prev => [...prev, data]);
-                  setCurrentConvId(data.id);
-                  setMessages([]);
-                  setActiveTab('thread');
-                  addLog('New session initialized.');
-                } catch (e: any) {
-                  showDialog('Error', { message: e.message || 'Failed to start conversation.' });
-                } finally {
-                  setIsProcessing(false);
-                }
-              }}
-              className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">add_circle</span>
-              <span className="text-[9px]">New</span>
-            </button>
-            <button className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">folder_open</span>
-              <span className="text-[9px]">Open</span>
-            </button>
-            <button className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">save</span>
-              <span className="text-[9px]">Save</span>
-            </button>
-          </div>
-          {/* Profile Switcher */}
-          <div className="flex items-center gap-2 px-2 border-r border-border-shadow">
-            <div className="flex flex-col">
-              <label className="text-[9px] mb-[1px]">Active Profile:</label>
-              <div className="inset-border bg-white flex items-center h-[18px]">
-                <select
-                  value={activeProfile}
-                  onChange={e => setActiveProfile(e.target.value)}
-                  className="bg-transparent text-[10px] border-none focus:ring-0 h-full py-0 pl-1 pr-5 font-body-standard outline-none min-w-[100px]"
-                  style={{
-                    appearance: 'none',
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M0 2l4 4 4-4z'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 4px center',
-                    paddingRight: '20px'
-                  }}>
-                  {profiles.map(p => (
-                    <option key={p.id} value={p.id}>{p.displayName}</option>
-                  ))}
-                  {profiles.length === 0 && <option value="programmer">Programmer</option>}
-                </select>
-              </div>
-            </div>
-          </div>
-          {/* Search / Packs group */}
-          <div className="flex items-center gap-0 px-2 border-r border-border-shadow">
-            <button className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">search</span>
-              <span className="text-[9px]">Search</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('library')}
-              className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">inventory_2</span>
-              <span className="text-[9px]">Packs</span>
-            </button>
-            <button className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">assignment_ind</span>
-              <span className="text-[9px]">Profiles</span>
-            </button>
-          </div>
-          {/* Diag / Settings group */}
-          <div className="flex items-center gap-0 px-2">
-            <button
-              onClick={() => setActiveTab('help')}
-              className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">analytics</span>
-              <span className="text-[9px]">Diag</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('control')}
-              className="flex flex-col items-center justify-center w-12 hover:bg-surface-bright p-1 active:translate-y-[1px]">
-              <span className="material-symbols-outlined text-secondary">settings</span>
-              <span className="text-[9px]">Settings</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
       {/* === Main Body === */}
       <main className="flex flex-1 overflow-hidden">
 
         {/* === Left Sidebar: Project Explorer === */}
         <aside className="flex flex-col w-[184px] h-full border-r border-border-shadow bg-window-inner shrink-0"
                style={{ boxShadow: 'inset -1px 0px 0px #FFFFFF' }}>
-          <div className="p-2 bg-dialog-face border-b border-border-shadow">
-            <span className="font-header-title text-header-title text-secondary">Project Explorer</span>
-            <div className="text-[9px] text-text-disabled">AI-Agent-v1.0.42</div>
+          <div className="p-2 bg-dialog-face border-b border-border-shadow flex items-center justify-between">
+            <div>
+              <span className="font-header-title text-header-title text-secondary">Project Explorer</span>
+              <div className="text-[9px] text-text-disabled">ChatGPT Workstation v1.0.42</div>
+            </div>
+            <button
+              onClick={handleNewConversation}
+              className="win32-button px-1.5 py-0.5 text-[9px] flex items-center gap-0.5 cursor-default shrink-0"
+              title="Start New Session"
+            >
+              <span className="material-symbols-outlined !text-[10px]">add</span>
+              New
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             <div className="space-y-0.5">
@@ -419,7 +310,7 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs,
                         <span className="material-symbols-outlined text-[48px] text-secondary">hub</span>
                       </div>
                     </div>
-                    <h2 className="font-display-welcome text-display-welcome text-primary mb-2">Welcome to Enterprise AI</h2>
+                    <h2 className="font-display-welcome text-display-welcome text-primary mb-2">Welcome to ChatGPT Enterprise AI</h2>
                     <p className="mb-8 text-on-surface-variant">Your workstation is initialized and ready. Select an action below to begin your professional AI session.</p>
                     <div className="grid grid-cols-1 gap-3 w-full">
                       <button
@@ -910,9 +801,34 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs,
             <span className="material-symbols-outlined text-[14px]">memory</span>
             <span>Memory: 382MB</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 mr-2">
             <span className="material-symbols-outlined text-[14px]">person</span>
-            <span className="font-bold text-secondary">Profile: {activeProfileData?.displayName || 'Programmer'}</span>
+            <span className="font-bold text-secondary text-[10px]">Profile:</span>
+            <div className="inset-border bg-white flex items-center h-[18px] px-[1px]">
+              <select
+                value={activeProfile}
+                onChange={e => setActiveProfile(e.target.value)}
+                className="bg-transparent text-[10px] border-none focus:ring-0 h-full py-0 pl-1 pr-4 font-body-standard outline-none min-w-[90px]"
+                style={{
+                  appearance: 'none',
+                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M0 2l4 4 4-4z'/%3E%3C/svg%3E\")",
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 3px center',
+                  paddingRight: '15px'
+                }}>
+                {profiles.map(p => (
+                  <option key={p.id} value={p.id}>{p.displayName}</option>
+                ))}
+                {profiles.length === 0 && <option value="programmer">Programmer</option>}
+              </select>
+            </div>
+            <button 
+              onClick={onLogout}
+              className="win32-button px-2 py-0.5 text-[9px] h-[18px] flex items-center justify-center cursor-default ml-2 active:translate-y-[1px]"
+              title="Log Out or Switch User Account"
+            >
+              Log Out
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-3">

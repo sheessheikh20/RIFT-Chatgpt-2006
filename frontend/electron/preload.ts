@@ -50,4 +50,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   /** Closes the host Electron window */
   closeWindow: (): void =>
     ipcRenderer.send(IPC_CHANNELS.CLOSE_WINDOW),
+
+  /** Listen for OAuth callback deep links */
+  onOAuthCallback: (callback: (data: { token?: string; name?: string; email?: string; picture?: string; error?: string }) => void): void => {
+    const listener = (_event: any, data: any) => callback(data);
+    ipcRenderer.on(IPC_CHANNELS.ON_OAUTH_CALLBACK, listener);
+  },
+  
+  /** Clean up OAuth callback listener */
+  removeOAuthListener: (): void => {
+    ipcRenderer.removeAllListeners(IPC_CHANNELS.ON_OAUTH_CALLBACK);
+  }
 });

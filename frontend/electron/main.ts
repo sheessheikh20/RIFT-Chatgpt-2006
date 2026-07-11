@@ -17,6 +17,25 @@ import { IPC_CHANNELS } from './ipc-channels.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ─── Custom Deep Link Protocol Client ──────────────────────────────────────────
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('chatgpt2006', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('chatgpt2006');
+}
+
+// Single Instance Lock
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  console.log('[Electron] Another instance is already running. Quitting...');
+  app.quit();
+}
+
+// Global state to store deep link URL on startup before window is ready
+let initialDeepLinkUrl: string | null = process.argv.find((arg) => arg.startsWith('chatgpt2006://')) || null;
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let mainWindow: BrowserWindow | null = null;
@@ -29,6 +48,32 @@ const BACKEND_PORT = 8080;
 const BACKEND_HEALTH_URL = `http://localhost:${BACKEND_PORT}/api/localdata/logs?limit=1`;
 const BACKEND_MAX_RETRIES = 30;
 const BACKEND_RETRY_INTERVAL_MS = 1000;
+
+// Helper to handle parsing deep links and forwarding to React frontend
+function handleDeepLinkUrl(urlStr: string): void {
+  console.log(`[Electron] Processing Deep Link URL: ${urlStr}`);
+  try {
+    const url = new URL(urlStr);
+    const params = new URLSearchParams(url.search);
+    const token = params.get('token');
+    const name = params.get('name');
+    const email = params.get('email');
+    const picture = params.get('picture');
+    const error = params.get('error');
+
+    if (mainWindow) {
+      mainWindow.webContents.send(IPC_CHANNELS.ON_OAUTH_CALLBACK, {
+        token: token || undefined,
+        name: name || undefined,
+        email: email || undefined,
+        picture: picture || undefined,
+        error: error || undefined,
+      });
+    }
+  } catch (err: any) {
+    console.error('[Electron] Failed to parse deep link URL:', urlStr, err.message);
+  }
+}
 
 // ─── Data Directory Initialization ────────────────────────────────────────────
 
@@ -169,6 +214,18 @@ function createWindow(): void {
     console.log('[Electron] did-finish-load — window should be visible now');
     mainWindow?.show();
     mainWindow?.focus();
+    
+    // Deliver initial deep link URL if application was started via protocol deep link
+    if (initialDeepLinkUrl) {
+      console.log(`[Electron] Delivering initial deep link URL: ${initialDeepLinkUrl}`);
+      setTimeout(() => {
+        if (initialDeepLinkUrl) {
+          handleDeepLinkUrl(initialDeepLinkUrl);
+          initialDeepLinkUrl = null;
+        }
+      }, 1000);
+    }
+    
     // Disable alwaysOnTop after a moment so normal window management works
     setTimeout(() => { mainWindow?.setAlwaysOnTop(false); }, 2000);
   });
@@ -250,6 +307,26 @@ function registerIpcHandlers(): void {
 }
 
 // ─── App Lifecycle ────────────────────────────────────────────────────────────
+
+// Intercept second instance of the app (Windows / Linux deep linking)
+app.on('second-instance', (event, commandLine) => {
+  console.log('[Electron] Second instance triggered with arguments:', commandLine);
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+  const url = commandLine.find((arg) => arg.startsWith('chatgpt2006://'));
+  if (url) {
+    handleDeepLinkUrl(url);
+  }
+});
+
+// Intercept custom protocol scheme link open (macOS deep linking)
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  console.log('[Electron] open-url event triggered:', url);
+  handleDeepLinkUrl(url);
+});
 
 app.whenReady().then(async () => {
   registerIpcHandlers();

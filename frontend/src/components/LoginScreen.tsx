@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { AuthResponse } from '../types';
 import * as api from '../api';
 import { useDialogStore } from '../store/dialogStore';
@@ -16,6 +16,30 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onCont
   const [licenseType, setLicenseType] = useState('Professional');
   const [isLoading, setIsLoading] = useState(false);
   const { showDialog } = useDialogStore();
+
+  // Register and clean up Electron custom scheme deep link handler on mount/unmount
+  useEffect(() => {
+    if (window.electronAPI?.onOAuthCallback) {
+      window.electronAPI.onOAuthCallback((data) => {
+        setIsLoading(false);
+        if (data.error) {
+          showDialog('Error', { message: `Google Sign-In failed: ${data.error}` });
+        } else if (data.token) {
+          api.setToken(data.token);
+          showDialog('Information', {
+            message: `Successfully authenticated via Google Accounts. Welcome back, ${data.name || 'Google User'}!`,
+            onConfirm: () => onLoginSuccess()
+          });
+        }
+      });
+    }
+
+    return () => {
+      if (window.electronAPI?.removeOAuthListener) {
+        window.electronAPI.removeOAuthListener();
+      }
+    };
+  }, [onLoginSuccess, showDialog]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +89,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onCont
         onConfirm: () => onLoginSuccess()
       });
     } catch (err: any) {
-      // 409 means username already exists
       if (err.status === 409 || err.message?.includes('already exists') || err.message?.includes('Conflict')) {
         showDialog('Error', { message: `The username "${username.trim()}" is already taken. Please choose a different one.` });
       } else {
@@ -80,29 +103,38 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onCont
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    setTimeout(async () => {
-      try {
-        // Try to log in as a fixed google guest account, register if it doesn't exist
-        const gUser = 'google_account_user';
-        let data: AuthResponse;
-        try {
-          data = await api.login({ username: gUser, password: 'google_oauth_2006' });
-        } catch {
-          data = await api.register({
-            username: gUser,
-            password: 'google_oauth_2006',
-            registeredTo: 'Google Account User',
-            licenseType: 'Professional',
-          });
-        }
-        api.setToken(data.token);
-        showDialog('Information', { message: 'Successfully authenticated via Google Accounts.', onConfirm: () => onLoginSuccess() });
-      } catch (err: any) {
-        showDialog('Error', { message: 'Google authentication service unavailable. Please use username/password.' });
-      } finally {
-        setIsLoading(false);
+    try {
+      // 1. Fetch authorization URL from spring boot backend
+      const res = await api.fetchGoogleAuthUrl();
+      if (!res.authUrl) {
+        throw new Error('No auth URL returned by backend.');
       }
-    }, 1200);
+      
+      // 2. Instruct Electron to launch the URL in the system browser
+      if (window.electronAPI?.openExternal) {
+        await window.electronAPI.openExternal(res.authUrl);
+      } else {
+        window.open(res.authUrl, '_blank');
+      }
+      
+      // Note: We stay in isLoading state while browser is open. The deep link event will reset it.
+    } catch (err: any) {
+      showDialog('Error', { message: `Failed to initialize Google Authentication: ${err.message || err}` });
+      setIsLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setIsLoading(true);
+    try {
+      const data = await api.guestLogin();
+      api.setToken(data.token);
+      onContinueAsGuest();
+    } catch (err: any) {
+      showDialog('Error', { message: `Failed to start Guest Session: ${err.message || err}` });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -230,7 +262,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onCont
           <button
             type="button"
             disabled={isLoading}
-            onClick={onContinueAsGuest}
+            onClick={handleGuestLogin}
             className="win32-button flex items-center justify-center gap-2 w-full text-text-disabled"
           >
             <span className="material-symbols-outlined text-[14px]">person_off</span>

@@ -98,6 +98,14 @@ export const getCurrentUser = async (): Promise<AuthResponse> => {
   return apiFetch<AuthResponse>('/api/auth/me');
 };
 
+export const fetchGoogleAuthUrl = async (): Promise<{ authUrl: string }> => {
+  return apiFetch<{ authUrl: string }>('/api/auth/google/init');
+};
+
+export const guestLogin = async (): Promise<AuthResponse> => {
+  return apiFetch<AuthResponse>('/api/auth/guest', { method: 'POST' });
+};
+
 /**
  * Silent auto-auth: tries to login as admin/password, then registers if not found.
  * Used during installer completion to set up the initial session.

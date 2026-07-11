@@ -9,7 +9,7 @@ import { QueueScreen } from './components/QueueScreen';
 import { WorkspaceScreen } from './components/WorkspaceScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { DialogManager } from './components/DialogManager';
-import { getToken, getCurrentUser } from './api';
+import { getToken, getCurrentUser, setToken } from './api';
 
 interface WindowSize {
   width: number;
@@ -65,7 +65,7 @@ const WINDOWS_CONFIG: Record<string, WindowSize> = {
     width: 1024,
     height: 768,
     title: 'ChatGPT Professional Enterprise Suite',
-    showChrome: false,
+    showChrome: true,
   },
 };
 
@@ -108,7 +108,16 @@ export default function App() {
   };
 
   const handleSplashFinished = () => {
-    setActiveWindowId('activation');
+    const token = getToken();
+    if (token) {
+      getCurrentUser().then(() => {
+        setActiveWindowId('workspace');
+      }).catch(() => {
+        setActiveWindowId('activation');
+      });
+    } else {
+      setActiveWindowId('activation');
+    }
   };
 
   const handleActivationFinished = () => {
@@ -136,6 +145,12 @@ export default function App() {
   const handleContinueAsGuest = () => {
     setIsGuestMode(true);
     setActiveWindowId('workspace');
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setIsGuestMode(false);
+    setActiveWindowId('login');
   };
 
   const handleWorkspaceClose = () => {
@@ -208,7 +223,8 @@ export default function App() {
         )}
         {activeWindowId === 'workspace' && (
           <WorkspaceScreen
-            onLogout={handleWorkspaceClose}
+            onLogout={handleLogout}
+            onClose={handleWorkspaceClose}
             latencyMs={latencyMs}
             isGuest={isGuestMode}
           />

@@ -213,6 +213,8 @@ export interface ElectronAPI {
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;
+  onOAuthCallback: (callback: (data: { token?: string; name?: string; email?: string; picture?: string; error?: string }) => void) => void;
+  removeOAuthListener: () => void;
 }
 
 declare global {
