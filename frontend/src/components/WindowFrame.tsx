@@ -91,7 +91,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({
             </span>
           </div>
           <div className="flex gap-[2px]" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-            {onMinimize && (
+            {(onMinimize || window.electronAPI) && (
               <button
                 onClick={handleMinimize}
                 className="w-[21px] h-[21px] bg-dialog-face outset-border flex items-center justify-center font-bold text-black text-[9px] hover:brightness-105 active:scale-95"
@@ -99,7 +99,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({
                 _
               </button>
             )}
-            {onMaximize && (
+            {(onMaximize || window.electronAPI) && (
               <button
                 onClick={handleMaximize}
                 className="w-[21px] h-[21px] bg-dialog-face outset-border flex items-center justify-center font-bold text-black text-[9px] hover:brightness-105 active:scale-95"
@@ -107,7 +107,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({
                 🗖
               </button>
             )}
-            {onClose && (
+            {(onClose || window.electronAPI) && (
               <button
                 onClick={handleClose}
                 className="w-[21px] h-[21px] bg-[#E81123] border border-white/40 flex items-center justify-center text-white text-[10px] font-bold hover:brightness-110 active:scale-95"

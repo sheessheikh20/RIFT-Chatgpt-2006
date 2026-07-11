@@ -31,7 +31,7 @@ mkdir release\1.0.0\win-unpacked\resources\app
 xcopy /s /e /i /y dist release\1.0.0\win-unpacked\resources\app\dist
 xcopy /s /e /i /y dist-electron release\1.0.0\win-unpacked\resources\app\dist-electron
 copy package.json release\1.0.0\win-unpacked\resources\app\package.json
-copy ..\backend\target\chat2006-1.0.0-SNAPSHOT.jar release\1.0.0\win-unpacked\resources\backend.jar
+copy ..\backend\target\chat2006-1.0.1-SNAPSHOT.jar release\1.0.0\win-unpacked\resources\backend.jar
 
 echo ===================================================
 echo [6/6] Generating NSIS installer package...

@@ -358,7 +358,7 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, onClose, l
                     </div>
                     <div className="mt-8 text-[10px] text-text-disabled flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-[14px]">info</span>
-                      Tip: You can change the AI personality using the Profile Switcher in the toolbar.
+                      Tip: You can change the AI personality using the Profile Switcher in the status bar at the bottom.
                     </div>
                   </div>
                 ) : (

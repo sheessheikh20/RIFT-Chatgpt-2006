@@ -194,6 +194,8 @@ function createWindow(): void {
     minWidth: 300,
     minHeight: 200,
     frame: false,
+    thickFrame: true,
+    resizable: true,
     title: 'ChatGPT Professional Enterprise Suite',
     show: true,
     alwaysOnTop: true,

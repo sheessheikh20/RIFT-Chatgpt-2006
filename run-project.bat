@@ -13,11 +13,12 @@ taskkill /F /IM node.exe 2>nul
 :: 2. Launch Spring Boot backend
 echo [Step 2] Launching Spring Boot backend...
 cd /d "%~dp0backend"
-if not exist "target\chat2006-1.0.0-SNAPSHOT.jar" (
+if not exist "target\chat2006-1.0.1-SNAPSHOT.jar" (
     echo [Backend] Compiled JAR not found. Building backend - requires Java and Maven...
     call mvn clean package -DskipTests
 )
-start "RIFT Backend Server" cmd /k "java -jar target\chat2006-1.0.0-SNAPSHOT.jar"
+restore-backend
+start "RIFT Backend Server" cmd /k "java -jar target\chat2006-1.0.1-SNAPSHOT.jar"
 
 :: 3. Launch Vite / Electron frontend
 echo [Step 3] Booting Electron Workspace Client...
