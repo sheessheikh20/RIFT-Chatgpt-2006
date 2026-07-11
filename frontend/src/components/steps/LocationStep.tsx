@@ -50,7 +50,19 @@ export const LocationStep: React.FC<StepProps> = ({
             />
             <button 
               className="w-[75px] h-[23px] bg-dialog-face win32-outset font-label-button text-label-button flex items-center justify-center hover:brightness-105 active:shadow-[inset_1px_1px_1px_#716F64] cursor-default"
-              onClick={() => alert("Simulated folder browser. Custom install path editable directly in path input box.")}
+              onClick={async () => {
+                if (window.electronAPI?.openFileDialog) {
+                  const selectedPath = await window.electronAPI.openFileDialog();
+                  if (selectedPath) {
+                    const finalPath = selectedPath.endsWith('\\') || selectedPath.endsWith('/')
+                      ? `${selectedPath}ChatGPT Professional`
+                      : `${selectedPath}\\ChatGPT Professional`;
+                    setInstallPath(finalPath);
+                  }
+                } else {
+                  alert("Simulated folder browser. Custom install path is editable directly in the input box.");
+                }
+              }}
             >
               Browse...
             </button>
