@@ -36,7 +36,7 @@ export const DiskSpaceStep: React.FC<StepProps> = ({ onNext, onBack, spaceRequir
         </p>
 
         {/* Detailed Breakdown Inset Box */}
-        <div className="inset-border bg-window-inner flex-grow flex flex-col p-3 font-body-standard">
+        <div className="inset-border bg-window-inner flex-grow flex flex-col p-3 font-body-standard overflow-y-auto">
           <div className="flex flex-col gap-4">
             {/* Path Section */}
             <div className="flex items-center gap-2">

@@ -7,6 +7,7 @@ import { ConnectionManagerScreen } from './components/ConnectionManagerScreen';
 import { ConnectingServerScreen } from './components/ConnectingServerScreen';
 import { QueueScreen } from './components/QueueScreen';
 import { WorkspaceScreen } from './components/WorkspaceScreen';
+import { LoginScreen } from './components/LoginScreen';
 import { DialogManager } from './components/DialogManager';
 
 interface WindowSize {
@@ -51,6 +52,12 @@ const WINDOWS_CONFIG: Record<string, WindowSize> = {
     width: 497,
     height: 360,
     title: 'Server Queue',
+    showChrome: true,
+  },
+  login: {
+    width: 497,
+    height: 390,
+    title: 'ChatGPT Workstation Login',
     showChrome: true,
   },
   workspace: {
@@ -102,6 +109,10 @@ export default function App() {
   };
 
   const handleQueueFinished = () => {
+    setActiveWindowId('login');
+  };
+
+  const handleLoginSuccess = () => {
     setActiveWindowId('workspace');
   };
 
@@ -166,6 +177,9 @@ export default function App() {
             onComplete={handleQueueFinished}
             onCancel={handleWorkspaceClose}
           />
+        )}
+        {activeWindowId === 'login' && (
+          <LoginScreen onLoginSuccess={handleLoginSuccess} />
         )}
         {activeWindowId === 'workspace' && (
           <WorkspaceScreen

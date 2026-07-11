@@ -58,6 +58,13 @@ export const SplashScreen: React.FC<SplashProps> = ({ onComplete }) => {
         setIsDone(true);
         setCurrentStatus('Initialization Complete.');
         setLogLines(prev => [...prev, logEntries[logEntries.length - 1]]);
+        // Auto transition after 1200ms
+        setTimeout(() => {
+          setIsFading(true);
+          setTimeout(() => {
+            onComplete();
+          }, 800);
+        }, 1200);
       }
     }, logInterval);
 
@@ -74,15 +81,10 @@ export const SplashScreen: React.FC<SplashProps> = ({ onComplete }) => {
     }
   }, [logLines, currentStatus]);
 
-  const handleNext = () => {
-    setIsFading(true);
-    setTimeout(() => {
-      onComplete();
-    }, 1000); // match transition duration
-  };
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   return (
-    <div className={`flex flex-col relative select-none w-full h-full bg-dialog-face transition-opacity duration-1000 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
+    <div className={`flex flex-col relative select-none w-full h-full bg-dialog-face transition-opacity duration-[800ms] ${isFading ? 'opacity-0' : 'opacity-100'}`}>
       
       {/* Top Branding Section */}
       <div className="h-[85px] bg-gradient-to-b from-white to-header-blue-bottom flex items-center px-6 border-b border-border-shadow flex-shrink-0">
@@ -176,19 +178,17 @@ export const SplashScreen: React.FC<SplashProps> = ({ onComplete }) => {
           </div>
           
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 outset-border px-2 py-1 bg-dialog-face h-fit">
-              <span className="material-symbols-outlined text-text-main font-fill-1">volume_up</span>
-              <span className="font-caption-small text-caption-small">Startup Sound Enabled</span>
+            <div 
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="flex items-center gap-2 outset-border px-2 py-1 bg-dialog-face h-fit cursor-pointer hover:brightness-105 active:shadow-inner"
+            >
+              <span className="material-symbols-outlined text-text-main font-fill-1">
+                {soundEnabled ? 'volume_up' : 'volume_off'}
+              </span>
+              <span className="font-caption-small text-caption-small">
+                {soundEnabled ? 'Startup Sound Enabled' : 'Startup Sound Muted'}
+              </span>
             </div>
-            
-            {isDone && (
-              <button 
-                onClick={handleNext}
-                className="outset-border bg-dialog-face px-6 py-1 font-label-button text-label-button hover:bg-surface-container active:translate-y-[1px] active:translate-x-[1px] shadow-sm font-bold border border-t-white border-l-white border-b-border-dark border-r-border-dark"
-              >
-                Next &gt;
-              </button>
-            )}
           </div>
         </div>
       </div>

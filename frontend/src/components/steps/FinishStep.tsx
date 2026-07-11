@@ -42,8 +42,7 @@ export const FinishStep: React.FC<StepProps> = ({ onFinish }) => {
               type="checkbox" 
               checked={launch}
               onChange={() => setLaunch(!launch)}
-              className="custom-checkbox appearance-none w-[13px] h-[13px] bg-white border border-border-shadow relative cursor-pointer"
-              style={{ boxShadow: "inset 1px 1px 0px #808080, inset -1px -1px 0px #ffffff" }}
+              className="win32-checkbox cursor-pointer"
             />
             <span className="text-body-standard font-body-standard text-text-main">Launch ChatGPT Professional</span>
           </label>
@@ -52,8 +51,7 @@ export const FinishStep: React.FC<StepProps> = ({ onFinish }) => {
               type="checkbox" 
               checked={guide}
               onChange={() => setGuide(!guide)}
-              className="custom-checkbox appearance-none w-[13px] h-[13px] bg-white border border-border-shadow relative cursor-pointer"
-              style={{ boxShadow: "inset 1px 1px 0px #808080, inset -1px -1px 0px #ffffff" }}
+              className="win32-checkbox cursor-pointer"
             />
             <span className="text-body-standard font-body-standard text-text-main">Open Getting Started Guide</span>
           </label>
@@ -62,8 +60,7 @@ export const FinishStep: React.FC<StepProps> = ({ onFinish }) => {
               type="checkbox" 
               checked={updates}
               onChange={() => setUpdates(!updates)}
-              className="custom-checkbox appearance-none w-[13px] h-[13px] bg-white border border-border-shadow relative cursor-pointer"
-              style={{ boxShadow: "inset 1px 1px 0px #808080, inset -1px -1px 0px #ffffff" }}
+              className="win32-checkbox cursor-pointer"
             />
             <span className="text-body-standard font-body-standard text-text-main">Check for Knowledge Pack Updates</span>
           </label>

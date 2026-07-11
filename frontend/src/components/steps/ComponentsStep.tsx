@@ -118,8 +118,7 @@ export const ComponentsStep: React.FC<StepProps> = ({
                   checked={comp.checked}
                   disabled={comp.required}
                   onChange={() => handleToggle(idx)}
-                  className="custom-checkbox appearance-none w-[13px] h-[13px] bg-white border border-border-shadow relative cursor-pointer checked:after:content-['✓'] checked:after:absolute checked:after:left-[2px] checked:after:top-[-2px] checked:after:text-[10px] checked:after:text-black checked:after:font-bold"
-                  style={{ boxShadow: "inset 1px 1px 0px #808080, inset -1px -1px 0px #ffffff" }}
+                  className="win32-checkbox cursor-pointer"
                 />
                 <span className="font-body-standard">{comp.name}</span>
               </div>
