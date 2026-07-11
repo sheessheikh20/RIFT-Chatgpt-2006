@@ -70,7 +70,8 @@ const WINDOWS_CONFIG: Record<string, WindowSize> = {
 };
 
 export default function App() {
-  const [latencyMs, setLatencyMs] = useState(150); // Default to Broadband
+  const [latencyMs, setLatencyMs] = useState(150);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   const [activeWindowId, setActiveWindowId] = useState<string>(() => {
     const installed = localStorage.getItem('isInstalled') === 'true';
@@ -128,6 +129,12 @@ export default function App() {
   };
 
   const handleLoginSuccess = () => {
+    setIsGuestMode(false);
+    setActiveWindowId('workspace');
+  };
+
+  const handleContinueAsGuest = () => {
+    setIsGuestMode(true);
     setActiveWindowId('workspace');
   };
 
@@ -194,12 +201,16 @@ export default function App() {
           />
         )}
         {activeWindowId === 'login' && (
-          <LoginScreen onLoginSuccess={handleLoginSuccess} />
+          <LoginScreen 
+            onLoginSuccess={handleLoginSuccess} 
+            onContinueAsGuest={handleContinueAsGuest}
+          />
         )}
         {activeWindowId === 'workspace' && (
           <WorkspaceScreen
             onLogout={handleWorkspaceClose}
             latencyMs={latencyMs}
+            isGuest={isGuestMode}
           />
         )}
       </WindowFrame>

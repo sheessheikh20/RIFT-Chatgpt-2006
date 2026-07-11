@@ -8,9 +8,12 @@ import { useKnowledgePackStore } from '../store/knowledgePackStore';
 interface WorkspaceProps {
   onLogout: () => void;
   latencyMs: number;
+  isGuest?: boolean;
 }
 
-export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs }) => {
+export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs, isGuest = false }) => {
+  const GUEST_MESSAGE_LIMIT = 5;
+  const [guestMessageCount, setGuestMessageCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'thread' | 'archive' | 'library' | 'control' | 'help'>('thread');
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -81,6 +84,22 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs 
 
   const handleExecute = async () => {
     if (!inputText.trim()) return;
+
+    // Guest mode message limit
+    if (isGuest) {
+      if (guestMessageCount >= GUEST_MESSAGE_LIMIT) {
+        showDialog('Warning', {
+          message: `Guest session limit reached (${GUEST_MESSAGE_LIMIT}/${GUEST_MESSAGE_LIMIT} messages used).\n\nPlease close and log in with an account to continue using the AI Workstation.`,
+        });
+        return;
+      }
+      if (guestMessageCount === GUEST_MESSAGE_LIMIT - 1) {
+        showDialog('Information', {
+          message: `This is your last free message (${GUEST_MESSAGE_LIMIT}/${GUEST_MESSAGE_LIMIT}). Register an account to get unlimited access.`,
+        });
+      }
+    }
+
     if (!currentConvId) {
       showDialog('Warning', { message: 'No active conversation thread.' });
       return;
@@ -88,6 +107,7 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs 
 
     const userMessage = inputText.trim();
     setInputText('');
+    if (isGuest) setGuestMessageCount(prev => prev + 1);
     setMessages(prev => [...prev, {
       id: Date.now().toString(),
       role: 'user',
@@ -896,6 +916,12 @@ export const WorkspaceScreen: React.FC<WorkspaceProps> = ({ onLogout, latencyMs 
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {isGuest && (
+            <div className="flex items-center gap-1 text-[10px] font-bold text-red-700 border border-red-400 bg-red-50 px-2 rounded-sm">
+              <span className="material-symbols-outlined text-[12px]">person_off</span>
+              GUEST: {Math.max(0, GUEST_MESSAGE_LIMIT - guestMessageCount)}/{GUEST_MESSAGE_LIMIT} msgs left
+            </div>
+          )}
           <div className={`flex items-center gap-1 font-bold italic text-[10px] ${isProcessing ? 'text-yellow-700' : 'text-green-700'}`}>
             <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-yellow-500 animate-pulse' : 'bg-green-500 animate-pulse'}`}></div>
             Status: {isProcessing ? 'Processing' : messages.length === 0 ? 'Standby' : 'Ready'}

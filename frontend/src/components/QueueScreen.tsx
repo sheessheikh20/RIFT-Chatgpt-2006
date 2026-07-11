@@ -77,17 +77,30 @@ export const QueueScreen: React.FC<QueueProps> = ({ onComplete, onCancel }) => {
             </span>
           </div>
 
-          {/* WinXP Style Progress Bar */}
-          <div className="inset-border w-full h-4 p-[1px] flex gap-[2px] bg-white overflow-hidden">
-            <div className="w-2 h-full bg-[#00D200] flex-shrink-0" />
-            <div className="w-2 h-full bg-[#00D200] flex-shrink-0" />
-            <div className="w-2 h-full bg-[#00D200] flex-shrink-0" />
-            <div className="w-2 h-full bg-[#00D200] flex-shrink-0" />
-            <div className="w-2 h-full bg-[#00D200] flex-shrink-0" />
-            <div className="w-2 h-full bg-[#00D200] led-blink flex-shrink-0" />
-            <div className="w-2 h-full bg-transparent flex-shrink-0" />
-            <div className="w-2 h-full bg-transparent flex-shrink-0" />
-          </div>
+          {/* WinXP Style Progress Bar - fills as time decreases */}
+          {(() => {
+            const TOTAL = 14;
+            const totalSegments = 10;
+            const elapsed = TOTAL - seconds;
+            const progress = isConnecting ? 1 : Math.min(elapsed / TOTAL, 1);
+            const filledCount = isConnecting ? totalSegments : Math.max(1, Math.floor(progress * totalSegments));
+            return (
+              <div className="inset-border w-full h-4 p-[1px] flex gap-[2px] bg-white overflow-hidden">
+                {[...Array(totalSegments)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-[10%] h-full flex-shrink-0 transition-colors duration-500 ${
+                      i < filledCount
+                        ? i === filledCount - 1 && !isConnecting
+                          ? 'bg-[#00D200] led-blink'
+                          : 'bg-[#00D200]'
+                        : 'bg-transparent'
+                    }`}
+                  />
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         {/* System Resources Status List */}
