@@ -113,24 +113,24 @@ export default function App() {
       getCurrentUser().then(() => {
         setActiveWindowId('workspace');
       }).catch(() => {
-        setActiveWindowId('activation');
+        setActiveWindowId('login');
       });
     } else {
-      setActiveWindowId('activation');
+      setActiveWindowId('login');
     }
   };
 
   const handleActivationFinished = () => {
-    setActiveWindowId('connection');
+    setActiveWindowId('login');
   };
 
   const handleConnectionSelected = (latency: number) => {
     setLatencyMs(latency);
-    setActiveWindowId('connecting');
+    setActiveWindowId('login');
   };
 
   const handleConnectingFinished = () => {
-    setActiveWindowId('queue');
+    setActiveWindowId('login');
   };
 
   const handleQueueFinished = () => {
